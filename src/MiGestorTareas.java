@@ -64,7 +64,7 @@ public class MiGestorTareas {
                 default:
                     //Creo este condicional para que separe las acciones de salir con los errores.
                     if(opcionSeleccionadaMenu != 5) {
-                        System.out.println("\nEsta opcion no es valida en el menú");
+                        System.out.println("\nEsta opción no es valida en el menú");
                         PausaEnEjecucion(scan);
                     }
                     break;
