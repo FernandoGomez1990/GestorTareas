@@ -1,7 +1,7 @@
 import java.lang.classfile.instruction.SwitchCase;
-import java.util.HashMap;
 import java.util.Scanner;
 import java.util.InputMismatchException;
+import java.util.ArrayList;
 
 public class MiGestorTareas {
     public static void main(String[] args){
@@ -10,13 +10,7 @@ public class MiGestorTareas {
 
         int opcionSeleccionadaMenu = 0;
 
-        HashMap<String, Boolean> tareas = new HashMap<>();
-
-        tareas.put("Actvidad6", false);
-        tareas.put("Tutoria", false);
-        tareas.put("EvaluacionCurso", true);
-
-        //System.out.println(tareas.keySet());
+        ArrayList<Tarea> tareas = new ArrayList<>();
 
         do {
             menu();
@@ -39,9 +33,14 @@ public class MiGestorTareas {
                     break;
                 case 2: //Consultar Tareas
                     int opcionSeleccionConsulta = 0;
-                    System.out.print("\nCuales tareas desea consultar, indique la opción: 1. Todas las tareas, 2. Tareas Realizadas, 3. Tareas pendientes.\n");
+                    System.out.print("\nCuales tareas desea consultar, indique la opción:"
+                                    +"\n1. Todas las tareas"
+                                    +"\n2. Tareas Realizadas"
+                                    +"\n3. Tareas pendientes.\n");
 
                     try {
+
+                        System.out.print("Seleccioné una opción de consulta: ");
                         opcionSeleccionConsulta = scan.nextInt();
 
                         ConsultaTareas(tareas, opcionSeleccionConsulta);
@@ -51,15 +50,14 @@ public class MiGestorTareas {
 
                         scan.nextLine(); // limpiar buffer
                     }
-
                     PausaEnEjecucion(scan);
                     break;
                 case 3: //Completar tareas
                     CompletarTarea(tareas, scan);
                     break;
-                case 4:
-                    int tareasSinRealizar =0;
-                    tareasSinRealizar = TareasPendientes(tareas);
+                case 4: // Mostrar pendientes
+                    int tareasSinRealizar = TareasPendientes(tareas);
+
                     System.out.println("\nEl numero total de tareas pendientes es: "+tareasSinRealizar);
                     PausaEnEjecucion(scan);
                     break;
@@ -77,8 +75,10 @@ public class MiGestorTareas {
         System.out.println("\t\t\tSeleccionaste la opción salir, hasta pronto...");
         scan.close();
     }
+
     /*
-    Se crea el menú principal como una función independiente para dejar el codigo mucho mas facil y legible
+    Se crea el menú principal como una función independiente
+    para dejar el codigo mucho mas facil y legible
     */
     public static void menu(){
         System.out.println("\t\tMENÚ PRINCIPAL");
@@ -89,7 +89,8 @@ public class MiGestorTareas {
         System.out.println("5. Salir del programa");
     }
     /*
-    Creo este método con la intención de usar un separador entre el menú y los resultados
+    Método para pausar la ejecución y permitir
+    visualizar los resultados en consola.
     */
     public static void PausaEnEjecucion(Scanner scan) {
         scan.nextLine(); // limpia el buffer
@@ -97,109 +98,123 @@ public class MiGestorTareas {
         scan.nextLine(); // espera al usuario
     }
     /*
-    Creo este método para hacer la consulta de las tareas con tres variaciones simplificando el código.
+    Método para agregar nuevas tareas al ArrayList.
     */
-    public  static void ConsultaTareas(HashMap<String, Boolean> tareasParam, int opcionSeleccionConsultaParam){
-        for(String tarea : tareasParam.keySet()) {
-            boolean completada = tareasParam.get(tarea);
+    public static void AgregarTarea(ArrayList<Tarea> tareasParam,Scanner scanParam){
 
-            String estadoTarea = "";
-            if(completada){
-                estadoTarea = "Completada";
-            }
-            else {
-                estadoTarea = "Pendiente";
-            }
-            switch (opcionSeleccionConsultaParam) {
-                //Mostrar todas
-                case 1:
-                    System.out.println(tarea + " - " + estadoTarea);
-                    break;
-                //Mostrar realizadas
-                case 2:
-                    if (completada) {
-                        System.out.println(tarea + " - "+estadoTarea);
-                    }
-                    break;
-                //Mostrar pendientes
-                case 3:
-                    if (!completada) {
-                        System.out.println(tarea + " - "+estadoTarea);
-                    }
-                    break;
-                default:
-            }
-        }
-        /*Hago un condicional por que no quiero que valide la opción del menú y solo muestre el mensaje de opción
-        invalidad una única vez cuando la opción del menú no corresponda a una de las opciones.
-        */
-        if(opcionSeleccionConsultaParam < 1 || opcionSeleccionConsultaParam > 3){
-            System.out.println("\n\t\tOpción invalida");
-        }
-    }
-
-    /*
-    Creación de un método para incorporar información nueva, se requiere para simplificar el código y
-    reutilizar la función en otros posibles escenarios.
-    */
-    public static void AgregarTarea(HashMap<String, Boolean> tareasParam,Scanner scanParam){
         scanParam.nextLine(); // limpiar buffer
+        System.out.print("\nIngrese la nueva tarea: ");
 
-        System.out.print("Ingrese la nueva tarea: ");
+        String nuevaDescripcion = scanParam.nextLine();
 
-        String nuevaTarea = scanParam.nextLine();
+        Tarea nuevaTarea = new Tarea();
 
-        tareasParam.put(nuevaTarea, false);
+        nuevaTarea.idTarea = tareasParam.size() + 1;
+        nuevaTarea.descripcion = nuevaDescripcion;
+        nuevaTarea.completada = false;
+
+        tareasParam.add(nuevaTarea);
 
         System.out.println("\n\t\tTarea agregada correctamente");
     }
-    /*
-    Creo este método para marcar las tareas terminadas, lo dejo como un método para que el Main quede más limpio y los
-    procesos de mantenimiento sean más fáciles en el futuro
-    */
-    public static void CompletarTarea(HashMap<String, Boolean> tareasParam, Scanner scanParam){
-        // Mostrar tareas
-        System.out.println("\nTAREAS:");
 
-        for(String tarea : tareasParam.keySet()){
-            System.out.println("- " + tarea);
+    /*
+    Método para consultar tareas según el filtro seleccionado.
+    */
+    public static void ConsultaTareas(ArrayList<Tarea> tareasParam,int opcionSeleccionConsultaParam){
+
+        if(tareasParam.isEmpty()){
+            System.out.println("\nNo existen tareas registradas.");
+            return;
         }
 
-        scanParam.nextLine(); // limpiar buffer
+        for(Tarea tarea : tareasParam){
+            String estadoTarea;
+            if(tarea.completada){
+                estadoTarea = "[X]";
+            } else {
+                estadoTarea = "[ ]";
+            }
 
-        // Pedir tarea
-        System.out.print("\nIngrese el nombre de la tarea a completar: ");
-
-        String tareaCompletar = scanParam.nextLine();
-
-        // Verificar si existe
-        if(tareasParam.containsKey(tareaCompletar)){
-
-            tareasParam.put(tareaCompletar, true);
-
-            System.out.println("Tarea marcada como completada");
-
-        }else{
-
-            System.out.println("La tarea no existe");
+            switch (opcionSeleccionConsultaParam){
+                case 1: // Mostrar todas
+                    System.out.println(tarea.idTarea + ". "+ estadoTarea+ " "+ tarea.descripcion);
+                    break;
+                case 2: // Mostrar completadas
+                    if(tarea.completada){
+                        System.out.println(tarea.idTarea + ". "+ estadoTarea+ " "+ tarea.descripcion);
+                    }
+                    break;
+                case 3: // Mostrar pendientes
+                    if(!tarea.completada){
+                        System.out.println(tarea.idTarea + ". "+ estadoTarea+ " "+ tarea.descripcion);
+                    }
+                    break;
+                default:
+                    System.out.println("\nOpción inválida.");
+                    return;
+            }
         }
     }
+
     /*
-    Creo un método que me retorna el numero de tareas pendientes, se usara con múltiples funciones, la primera como
-    limpieza del código Main, la segunda en múltiples funciones y toma de decisiones futuras.
+    Método para marcar una tarea como completada.
     */
-    public static  int TareasPendientes(HashMap<String, Boolean> tareasParam){
+    public static void CompletarTarea(ArrayList<Tarea> tareasParam,Scanner scanParam){
+
+        if(tareasParam.isEmpty()){
+            System.out.println("\nNo existen tareas registradas.");
+            return;
+        }
+        System.out.println("\nTAREAS:");
+        for(Tarea tarea : tareasParam){
+            String estado;
+            if(tarea.completada){
+                estado = "[X]";
+            } else {
+                estado = "[ ]";
+            }
+
+            System.out.println(tarea.idTarea + ". "+ estado+ " "+ tarea.descripcion);
+        }
+
+        try {
+
+            System.out.print("\nIngrese el ID de la tarea a completar: ");
+
+            int idBuscar = scanParam.nextInt();
+
+            boolean tareaEncontrada = false;
+
+            for(Tarea tarea : tareasParam){
+                if(tarea.idTarea == idBuscar){
+                    tarea.completada = true;
+                    tareaEncontrada = true;
+                    System.out.println("\nTarea marcada como completada.");
+                    break;
+                }
+            }
+            if(!tareaEncontrada){
+                System.out.println("\nNo existe una tarea con ese ID.");
+            }
+        } catch (InputMismatchException e){
+            System.out.println("\nError: Debe ingresar un número válido.");
+            scanParam.nextLine();
+        }
+    }
+
+    /*
+    Método que retorna el total de tareas pendientes.
+    */
+    public static int TareasPendientes(ArrayList<Tarea> tareasParam){
 
         int totalTareasPendientes = 0;
 
-        for(String tarea : tareasParam.keySet()){
-            boolean completada = tareasParam.get(tarea);
-
-            if(!completada){
-                totalTareasPendientes ++;
+        for(Tarea tarea : tareasParam){
+            if(!tarea.completada){
+                totalTareasPendientes++;
             }
         }
-
         return totalTareasPendientes;
     }
 }
