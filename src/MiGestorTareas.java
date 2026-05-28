@@ -56,7 +56,7 @@ public class MiGestorTareas {
                     CompletarTarea(tareas, scan);
                     break;
                 case 4: // Mostrar pendientes
-                    int tareasSinRealizar = TareasPendientes(tareas);
+                    int tareasSinRealizar = TareasPendientes(tareas, 0);
 
                     System.out.println("\nEl numero total de tareas pendientes es: "+tareasSinRealizar);
                     PausaEnEjecucion(scan);
@@ -206,15 +206,33 @@ public class MiGestorTareas {
     /*
     Método que retorna el total de tareas pendientes.
     */
-    public static int TareasPendientes(ArrayList<Tarea> tareasParam){
+    public static int TareasPendientes(ArrayList<Tarea> tareasParam,int indice){
 
-        int totalTareasPendientes = 0;
+        // Caso base:
+        // Si el índice llega al tamaño total de la lista,
+        // significa que ya no existen más tareas por recorrer.
+        if(indice == tareasParam.size()){
 
-        for(Tarea tarea : tareasParam){
-            if(!tarea.completada){
-                totalTareasPendientes++;
-            }
+            return 0;
         }
-        return totalTareasPendientes;
+
+        // Caso recursivo:
+        // Verifica si la tarea actual está pendiente.
+        if(!tareasParam.get(indice).completada){
+
+            // Suma 1 y llama nuevamente al método
+            // avanzando a la siguiente posición.
+            return 1 + TareasPendientes(
+                    tareasParam,
+                    indice + 1
+            );
+        }
+
+        // Si la tarea está completada,
+        // simplemente continúa con la siguiente.
+        return TareasPendientes(
+                tareasParam,
+                indice + 1
+        );
     }
 }
